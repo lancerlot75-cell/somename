@@ -13,3 +13,10 @@
   frameworks or libraries bundled into the project, and no build step
   (no bundlers, transpilers, or package managers required to run it).
   Open `index.html` directly in a browser and it must work.
+
+## Tech stack (hard constraints — do not deviate)
+- Vanilla HTML, CSS, and JavaScript only. No React, Vue, or any JS framework.
+- Tailwind CSS for all styling (via CDN only).
+- No backend, no database. Fully static site.
+- A toggle for light and dark theme, with the choice remembered
+  across visits.
