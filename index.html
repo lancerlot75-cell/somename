@@ -102,6 +102,211 @@
       </p>
     </section>
 
+    <section id="view-hydraulic-sequencing" class="hidden" data-tool-view>
+      <a href="#" class="text-sm text-slate-500 dark:text-slate-400 hover:underline">&larr; Back to catalog</a>
+      <h1 class="text-2xl font-bold mt-2 mb-1">Hydraulic Sequencing Circuits</h1>
+      <p class="text-slate-600 dark:text-slate-400 mb-6">
+        A sequencing circuit forces two cylinders to move in a fixed order instead of together. Step through two
+        common ways to enforce that order, answering a quick check-in after each, then take a short quiz at the end.
+      </p>
+
+      <section id="hs-circuit-mech">
+        <h2 class="text-xl font-semibold mb-1">Circuit 1: Mechanical (Pilot-Operated) Sequence Valve — STAMP &amp; CLAMP</h2>
+        <p class="text-slate-600 dark:text-slate-400 mb-4">
+          One directional valve feeds both cylinders, but a sequence valve sits in front of each. It blocks flow
+          until the upstream cylinder has finished its stroke and stalled, letting pressure rise enough to crack it open.
+        </p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 p-2">
+            <svg id="ms-svg" viewBox="0 0 520 300" class="w-full h-auto">
+              <rect x="0" y="0" width="520" height="300" fill="#f8fafc" rx="8"></rect>
+
+              <text x="130" y="12" text-anchor="middle" font-size="13" font-weight="600" fill="#1e293b">STAMP</text>
+              <g id="ms-piston-stamp">
+                <rect x="55" y="33" width="90" height="14" rx="2" fill="#64748b"></rect>
+              </g>
+              <rect x="70" y="18" width="120" height="40" fill="#cbd5e1" stroke="#475569" stroke-width="2"></rect>
+
+              <text x="390" y="12" text-anchor="middle" font-size="13" font-weight="600" fill="#1e293b">CLAMP</text>
+              <g id="ms-piston-clamp">
+                <rect x="375" y="33" width="90" height="14" rx="2" fill="#64748b"></rect>
+              </g>
+              <rect x="330" y="18" width="120" height="40" fill="#cbd5e1" stroke="#475569" stroke-width="2"></rect>
+
+              <path id="ms-line-stamp" d="M130,125 L130,150 L245,150 L245,170" fill="none" stroke="#cbd5e1" stroke-width="2.5"></path>
+              <path id="ms-line-clamp" d="M390,125 L390,150 L275,150 L275,170" fill="none" stroke="#cbd5e1" stroke-width="2.5"></path>
+
+              <rect id="ms-valve-stamp-rect" x="95" y="95" width="70" height="30" rx="4" fill="#94a3b8"></rect>
+              <text id="ms-valve-stamp-label" x="130" y="114" text-anchor="middle" font-size="11" fill="white">HOLD</text>
+              <text x="130" y="140" text-anchor="middle" font-size="10" fill="#475569">Seq. valve</text>
+
+              <rect id="ms-valve-clamp-rect" x="355" y="95" width="70" height="30" rx="4" fill="#94a3b8"></rect>
+              <text id="ms-valve-clamp-label" x="390" y="114" text-anchor="middle" font-size="11" fill="white">HOLD</text>
+              <text x="390" y="140" text-anchor="middle" font-size="10" fill="#475569">Seq. valve</text>
+
+              <text x="260" y="164" text-anchor="middle" font-size="10" fill="#475569">Directional valve</text>
+              <rect id="ms-dcv-box" x="220" y="170" width="80" height="36" rx="4" fill="#2563eb"></rect>
+              <text id="ms-dcv-label" x="260" y="192" text-anchor="middle" font-size="12" font-weight="600" fill="white">EXTEND &#8594;</text>
+
+              <line x1="260" y1="206" x2="260" y2="228" stroke="#475569" stroke-width="2"></line>
+              <circle cx="260" cy="250" r="22" fill="#e2e8f0" stroke="#475569" stroke-width="2"></circle>
+              <text x="260" y="255" text-anchor="middle" font-size="12" fill="#1e293b">M</text>
+              <line x1="260" y1="272" x2="260" y2="285" stroke="#475569" stroke-width="2"></line>
+              <rect x="230" y="285" width="60" height="12" fill="#e2e8f0" stroke="#475569" stroke-width="2"></rect>
+              <text x="260" y="300" text-anchor="middle" font-size="9" fill="#475569">Tank</text>
+            </svg>
+          </div>
+
+          <div class="space-y-3">
+            <div class="rounded-md border border-slate-200 dark:border-slate-700 p-3 text-sm">
+              <div class="flex justify-between mb-1">
+                <span class="text-slate-500 dark:text-slate-400">Step</span><span id="ms-stepnum">1 / 4</span>
+              </div>
+              <p id="ms-desc"></p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button id="ms-prev" class="rounded-md border border-slate-300 dark:border-slate-600 px-3 py-1.5 text-sm hover:bg-slate-100 dark:hover:bg-slate-800">&larr; Prev</button>
+              <button id="ms-next" class="rounded-md bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900 px-3 py-1.5 text-sm">Next step &rarr;</button>
+              <button id="ms-reset" class="rounded-md border border-slate-300 dark:border-slate-600 px-3 py-1.5 text-sm hover:bg-slate-100 dark:hover:bg-slate-800">Reset</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="hs-checkin-mech" class="mt-5 rounded-md border border-slate-200 dark:border-slate-700 p-4">
+          <p class="font-medium text-sm mb-2">
+            Check-in: what determines when STAMP is allowed to start extending?
+          </p>
+          <div class="space-y-1.5 text-sm">
+            <label class="flex items-center gap-2"><input type="radio" name="checkin-mech" value="a"> A fixed timer in a PLC</label>
+            <label class="flex items-center gap-2"><input type="radio" name="checkin-mech" value="b"> Pressure rising enough, once CLAMP fully extends and stalls, to crack open STAMP's sequence valve</label>
+            <label class="flex items-center gap-2"><input type="radio" name="checkin-mech" value="c"> The operator manually opening a valve</label>
+          </div>
+          <button data-checkin-submit class="mt-3 rounded-md bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900 px-3 py-1.5 text-sm">Check answer</button>
+          <p data-checkin-feedback class="mt-2 text-sm hidden"></p>
+          <button data-checkin-continue class="mt-3 hidden rounded-md border border-slate-300 dark:border-slate-600 px-3 py-1.5 text-sm hover:bg-slate-100 dark:hover:bg-slate-800">Continue to Circuit 2 &rarr;</button>
+        </div>
+      </section>
+
+      <section id="hs-circuit-press" class="hidden mt-8 border-t border-slate-200 dark:border-slate-700 pt-6">
+        <h2 class="text-xl font-semibold mb-1">Circuit 2: Pressure Sequencing Valve — A &amp; B</h2>
+        <p class="text-slate-600 dark:text-slate-400 mb-4">
+          Same idea, different hardware: pressure-operated sequence valves in the lines to A and B enforce the order
+          A extends, B extends, B retracts, A retracts.
+        </p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 p-2">
+            <svg id="ps-svg" viewBox="0 0 520 300" class="w-full h-auto">
+              <rect x="0" y="0" width="520" height="300" fill="#f8fafc" rx="8"></rect>
+
+              <text x="130" y="12" text-anchor="middle" font-size="13" font-weight="600" fill="#1e293b">A</text>
+              <g id="ps-piston-a">
+                <rect x="55" y="33" width="90" height="14" rx="2" fill="#64748b"></rect>
+              </g>
+              <rect x="70" y="18" width="120" height="40" fill="#cbd5e1" stroke="#475569" stroke-width="2"></rect>
+
+              <text x="390" y="12" text-anchor="middle" font-size="13" font-weight="600" fill="#1e293b">B</text>
+              <g id="ps-piston-b">
+                <rect x="375" y="33" width="90" height="14" rx="2" fill="#64748b"></rect>
+              </g>
+              <rect x="330" y="18" width="120" height="40" fill="#cbd5e1" stroke="#475569" stroke-width="2"></rect>
+
+              <path id="ps-line-a" d="M130,125 L130,150 L245,150 L245,170" fill="none" stroke="#cbd5e1" stroke-width="2.5"></path>
+              <path id="ps-line-b" d="M390,125 L390,150 L275,150 L275,170" fill="none" stroke="#cbd5e1" stroke-width="2.5"></path>
+
+              <rect id="ps-valve-a-rect" x="95" y="95" width="70" height="30" rx="4" fill="#94a3b8"></rect>
+              <text id="ps-valve-a-label" x="130" y="114" text-anchor="middle" font-size="11" fill="white">HOLD</text>
+              <text x="130" y="140" text-anchor="middle" font-size="10" fill="#475569">Seq. valve</text>
+
+              <rect id="ps-valve-b-rect" x="355" y="95" width="70" height="30" rx="4" fill="#94a3b8"></rect>
+              <text id="ps-valve-b-label" x="390" y="114" text-anchor="middle" font-size="11" fill="white">HOLD</text>
+              <text x="390" y="140" text-anchor="middle" font-size="10" fill="#475569">Seq. valve</text>
+
+              <text x="260" y="164" text-anchor="middle" font-size="10" fill="#475569">Directional valve</text>
+              <rect id="ps-dcv-box" x="220" y="170" width="80" height="36" rx="4" fill="#2563eb"></rect>
+              <text id="ps-dcv-label" x="260" y="192" text-anchor="middle" font-size="12" font-weight="600" fill="white">EXTEND &#8594;</text>
+
+              <line x1="260" y1="206" x2="260" y2="228" stroke="#475569" stroke-width="2"></line>
+              <circle cx="260" cy="250" r="22" fill="#e2e8f0" stroke="#475569" stroke-width="2"></circle>
+              <text x="260" y="255" text-anchor="middle" font-size="12" fill="#1e293b">M</text>
+              <line x1="260" y1="272" x2="260" y2="285" stroke="#475569" stroke-width="2"></line>
+              <rect x="230" y="285" width="60" height="12" fill="#e2e8f0" stroke="#475569" stroke-width="2"></rect>
+              <text x="260" y="300" text-anchor="middle" font-size="9" fill="#475569">Tank</text>
+            </svg>
+          </div>
+
+          <div class="space-y-3">
+            <div class="rounded-md border border-slate-200 dark:border-slate-700 p-3 text-sm">
+              <div class="flex justify-between mb-1">
+                <span class="text-slate-500 dark:text-slate-400">Step</span><span id="ps-stepnum">1 / 4</span>
+              </div>
+              <p id="ps-desc"></p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button id="ps-prev" class="rounded-md border border-slate-300 dark:border-slate-600 px-3 py-1.5 text-sm hover:bg-slate-100 dark:hover:bg-slate-800">&larr; Prev</button>
+              <button id="ps-next" class="rounded-md bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900 px-3 py-1.5 text-sm">Next step &rarr;</button>
+              <button id="ps-reset" class="rounded-md border border-slate-300 dark:border-slate-600 px-3 py-1.5 text-sm hover:bg-slate-100 dark:hover:bg-slate-800">Reset</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="hs-checkin-press" class="mt-5 rounded-md border border-slate-200 dark:border-slate-700 p-4">
+          <p class="font-medium text-sm mb-2">
+            Check-in: what is the correct order of operation in this circuit?
+          </p>
+          <div class="space-y-1.5 text-sm">
+            <label class="flex items-center gap-2"><input type="radio" name="checkin-press" value="a"> A extends, B extends, A retracts, B retracts</label>
+            <label class="flex items-center gap-2"><input type="radio" name="checkin-press" value="b"> A and B extend at the same time, then retract together</label>
+            <label class="flex items-center gap-2"><input type="radio" name="checkin-press" value="c"> A extends, B extends, B retracts, A retracts</label>
+          </div>
+          <button data-checkin-submit class="mt-3 rounded-md bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900 px-3 py-1.5 text-sm">Check answer</button>
+          <p data-checkin-feedback class="mt-2 text-sm hidden"></p>
+          <button data-checkin-continue class="mt-3 hidden rounded-md border border-slate-300 dark:border-slate-600 px-3 py-1.5 text-sm hover:bg-slate-100 dark:hover:bg-slate-800">Continue to quiz &rarr;</button>
+        </div>
+      </section>
+
+      <section id="hs-quiz" class="hidden mt-8 border-t border-slate-200 dark:border-slate-700 pt-6">
+        <h2 class="text-xl font-semibold mb-3">Quiz: check your understanding</h2>
+        <div class="space-y-5">
+          <div data-quiz-q="1" class="text-sm">
+            <p class="font-medium mb-2">1. A downstream actuator in a sequence valve circuit does not move until...</p>
+            <div class="space-y-1.5">
+              <label class="flex items-center gap-2"><input type="radio" name="quiz-q1" value="a"> the operator presses a button</label>
+              <label class="flex items-center gap-2"><input type="radio" name="quiz-q1" value="b"> the upstream actuator reaches its stroke end and system pressure rises enough to crack open the sequence valve</label>
+              <label class="flex items-center gap-2"><input type="radio" name="quiz-q1" value="c"> the pump speed increases</label>
+              <label class="flex items-center gap-2"><input type="radio" name="quiz-q1" value="d"> the reservoir is refilled</label>
+            </div>
+            <p data-quiz-feedback class="mt-1 text-sm hidden"></p>
+          </div>
+
+          <div data-quiz-q="2" class="text-sm">
+            <p class="font-medium mb-2">2. In the pressure sequencing valve circuit (A/B), what is the correct order of operations?</p>
+            <div class="space-y-1.5">
+              <label class="flex items-center gap-2"><input type="radio" name="quiz-q2" value="a"> A extends, B extends, A retracts, B retracts</label>
+              <label class="flex items-center gap-2"><input type="radio" name="quiz-q2" value="b"> B extends, A extends, A retracts, B retracts</label>
+              <label class="flex items-center gap-2"><input type="radio" name="quiz-q2" value="c"> A extends, B extends, B retracts, A retracts</label>
+              <label class="flex items-center gap-2"><input type="radio" name="quiz-q2" value="d"> A and B extend simultaneously</label>
+            </div>
+            <p data-quiz-feedback class="mt-1 text-sm hidden"></p>
+          </div>
+
+          <div data-quiz-q="3" class="text-sm">
+            <p class="font-medium mb-2">3. Once its upstream actuator has stalled, what does a sequence valve do?</p>
+            <div class="space-y-1.5">
+              <label class="flex items-center gap-2"><input type="radio" name="quiz-q3" value="a"> Vents the whole system to tank</label>
+              <label class="flex items-center gap-2"><input type="radio" name="quiz-q3" value="b"> Blocks flow until pressure rises above its setting, then opens to allow the next actuator to move</label>
+              <label class="flex items-center gap-2"><input type="radio" name="quiz-q3" value="c"> Reverses the pump's rotation</label>
+              <label class="flex items-center gap-2"><input type="radio" name="quiz-q3" value="d"> Has no further function</label>
+            </div>
+            <p data-quiz-feedback class="mt-1 text-sm hidden"></p>
+          </div>
+        </div>
+        <button id="hs-quiz-submit" class="mt-4 rounded-md bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900 px-3 py-1.5 text-sm">Check answers</button>
+        <p id="hs-quiz-score" class="mt-3 font-medium hidden"></p>
+      </section>
+    </section>
+
   </main>
 
 <script>
@@ -115,6 +320,11 @@
       id: 'four-bar-linkage',
       title: 'Four-Bar Linkage / Cam Mechanism Visualizer',
       description: 'Linkage or cam profile motion animated in real time.'
+    },
+    {
+      id: 'hydraulic-sequencing',
+      title: 'Hydraulic Sequencing Circuits',
+      description: 'Step through mechanical and pressure sequence valve circuits, with check-ins and a quiz.'
     }
   ];
 
@@ -361,6 +571,177 @@
   initScene();
   if (location.hash === '#pump-visualizer') resize();
   tick();
+})();
+</script>
+
+<script>
+(function () {
+  // Drives a step-through sequence-valve circuit diagram: which cylinder is
+  // currently moving, which sequence valve is passing flow, and the
+  // directional valve's position. Re-derives cylinder state from scratch on
+  // every render so stepping backward/forward and reset all stay correct.
+  function makeSequenceSim(config) {
+    var current = 0;
+
+    function render() {
+      var step = config.steps[current];
+      var extended = {};
+      Object.keys(config.pistons).forEach(function (k) { extended[k] = false; });
+      for (var i = 0; i <= current; i++) {
+        extended[config.steps[i].act] = config.steps[i].dir === 'extend';
+      }
+
+      Object.keys(config.pistons).forEach(function (k) {
+        var p = config.pistons[k];
+        p.el.style.transform = extended[k] ? 'translateX(' + p.dx + 'px)' : 'translateX(0px)';
+      });
+      Object.keys(config.valves).forEach(function (k) {
+        var v = config.valves[k];
+        var flowing = step.act === k;
+        v.rect.setAttribute('fill', flowing ? '#16a34a' : '#94a3b8');
+        v.label.textContent = flowing ? 'OPEN' : 'HOLD';
+      });
+      Object.keys(config.lines).forEach(function (k) {
+        var active = step.act === k;
+        config.lines[k].setAttribute('stroke', active ? '#f97316' : '#cbd5e1');
+        config.lines[k].setAttribute('stroke-width', active ? '4' : '2.5');
+      });
+      config.dcvBox.setAttribute('fill', step.dir === 'extend' ? '#2563eb' : '#ea580c');
+      config.dcvLabel.textContent = step.dir === 'extend' ? 'EXTEND →' : '← RETRACT';
+      config.descEl.textContent = step.text;
+      config.stepNumEl.textContent = (current + 1) + ' / ' + config.steps.length;
+      config.prevBtn.disabled = current === 0;
+      config.nextBtn.disabled = current === config.steps.length - 1;
+    }
+
+    config.prevBtn.addEventListener('click', function () { if (current > 0) { current--; render(); } });
+    config.nextBtn.addEventListener('click', function () { if (current < config.steps.length - 1) { current++; render(); } });
+    config.resetBtn.addEventListener('click', function () { current = 0; render(); });
+
+    render();
+  }
+
+  function bySuffix(prefix, suffix) { return document.getElementById(prefix + '-' + suffix); }
+
+  makeSequenceSim({
+    pistons: {
+      clamp: { el: bySuffix('ms', 'piston-clamp'), dx: 55 },
+      stamp: { el: bySuffix('ms', 'piston-stamp'), dx: -55 }
+    },
+    valves: {
+      clamp: { rect: bySuffix('ms', 'valve-clamp-rect'), label: bySuffix('ms', 'valve-clamp-label') },
+      stamp: { rect: bySuffix('ms', 'valve-stamp-rect'), label: bySuffix('ms', 'valve-stamp-label') }
+    },
+    lines: { clamp: bySuffix('ms', 'line-clamp'), stamp: bySuffix('ms', 'line-stamp') },
+    dcvBox: bySuffix('ms', 'dcv-box'),
+    dcvLabel: bySuffix('ms', 'dcv-label'),
+    descEl: bySuffix('ms', 'desc'),
+    stepNumEl: bySuffix('ms', 'stepnum'),
+    prevBtn: bySuffix('ms', 'prev'),
+    nextBtn: bySuffix('ms', 'next'),
+    resetBtn: bySuffix('ms', 'reset'),
+    steps: [
+      { act: 'clamp', dir: 'extend', text: 'CLAMP extends first — its sequence valve is open, while STAMP’s stays closed, blocking flow until pressure builds.' },
+      { act: 'stamp', dir: 'extend', text: 'CLAMP has reached full extension and stalled, so pressure rises until it cracks open STAMP’s sequence valve — STAMP now extends.' },
+      { act: 'stamp', dir: 'retract', text: 'Both cylinders are extended. The directional valve reverses to retract. STAMP’s retract sequence valve is open, so it retracts first while CLAMP stays extended.' },
+      { act: 'clamp', dir: 'retract', text: 'STAMP has fully retracted, pressure builds, and CLAMP’s sequence valve opens — CLAMP retracts, completing the cycle.' }
+    ]
+  });
+
+  makeSequenceSim({
+    pistons: {
+      a: { el: bySuffix('ps', 'piston-a'), dx: -55 },
+      b: { el: bySuffix('ps', 'piston-b'), dx: 55 }
+    },
+    valves: {
+      a: { rect: bySuffix('ps', 'valve-a-rect'), label: bySuffix('ps', 'valve-a-label') },
+      b: { rect: bySuffix('ps', 'valve-b-rect'), label: bySuffix('ps', 'valve-b-label') }
+    },
+    lines: { a: bySuffix('ps', 'line-a'), b: bySuffix('ps', 'line-b') },
+    dcvBox: bySuffix('ps', 'dcv-box'),
+    dcvLabel: bySuffix('ps', 'dcv-label'),
+    descEl: bySuffix('ps', 'desc'),
+    stepNumEl: bySuffix('ps', 'stepnum'),
+    prevBtn: bySuffix('ps', 'prev'),
+    nextBtn: bySuffix('ps', 'next'),
+    resetBtn: bySuffix('ps', 'reset'),
+    steps: [
+      { act: 'a', dir: 'extend', text: 'A extends first — its sequence valve is open, while B’s stays closed, blocking flow until pressure builds.' },
+      { act: 'b', dir: 'extend', text: 'A has reached full extension and stalled, so pressure rises until it cracks open B’s sequence valve — B now extends.' },
+      { act: 'b', dir: 'retract', text: 'Both cylinders are extended. The directional valve reverses to retract. B’s retract sequence valve is open, so it retracts first while A stays extended.' },
+      { act: 'a', dir: 'retract', text: 'B has fully retracted, pressure builds, and A’s sequence valve opens — A retracts, completing the cycle.' }
+    ]
+  });
+
+  // A single check-in question gated behind a submit, with a Continue button
+  // that reveals the next section regardless of whether the answer was right.
+  function wireCheckin(rootId, correctValue, correctExplain, wrongExplain, revealId) {
+    var root = document.getElementById(rootId);
+    var submitBtn = root.querySelector('[data-checkin-submit]');
+    var feedback = root.querySelector('[data-checkin-feedback]');
+    var continueBtn = root.querySelector('[data-checkin-continue]');
+
+    submitBtn.addEventListener('click', function () {
+      var picked = root.querySelector('input[type="radio"]:checked');
+      if (!picked) {
+        feedback.textContent = 'Choose an answer first.';
+        feedback.className = 'mt-2 text-sm text-amber-600 dark:text-amber-400';
+        feedback.classList.remove('hidden');
+        return;
+      }
+      var correct = picked.value === correctValue;
+      feedback.textContent = correct ? '✓ ' + correctExplain : '✗ ' + wrongExplain;
+      feedback.className = 'mt-2 text-sm ' + (correct ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400');
+      feedback.classList.remove('hidden');
+      continueBtn.classList.remove('hidden');
+      root.querySelectorAll('input[type="radio"]').forEach(function (r) { r.disabled = true; });
+      submitBtn.disabled = true;
+    });
+
+    continueBtn.addEventListener('click', function () {
+      document.getElementById(revealId).classList.remove('hidden');
+      document.getElementById(revealId).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+
+  wireCheckin(
+    'hs-checkin-mech', 'b',
+    'Right — the sequence valve only opens once the upstream cylinder stalls and pressure rises.',
+    'Not quite — it’s the pressure rise from CLAMP stalling at full extension that cracks open STAMP’s sequence valve.',
+    'hs-circuit-press'
+  );
+  wireCheckin(
+    'hs-checkin-press', 'c',
+    'Right — A extends, B extends, then B retracts before A retracts.',
+    'Not quite — the order is A extends, B extends, B retracts, then A retracts.',
+    'hs-quiz'
+  );
+
+  var quizAnswers = { 1: 'b', 2: 'c', 3: 'b' };
+  document.getElementById('hs-quiz-submit').addEventListener('click', function () {
+    var score = 0;
+    var total = 0;
+    Object.keys(quizAnswers).forEach(function (q) {
+      total++;
+      var qDiv = document.querySelector('[data-quiz-q="' + q + '"]');
+      var picked = qDiv.querySelector('input[type="radio"]:checked');
+      var fb = qDiv.querySelector('[data-quiz-feedback]');
+      if (!picked) {
+        fb.textContent = 'No answer selected.';
+        fb.className = 'mt-1 text-sm text-amber-600 dark:text-amber-400';
+        fb.classList.remove('hidden');
+        return;
+      }
+      var correct = picked.value === quizAnswers[q];
+      if (correct) score++;
+      fb.textContent = correct ? '✓ Correct' : '✗ Not quite';
+      fb.className = 'mt-1 text-sm ' + (correct ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400');
+      fb.classList.remove('hidden');
+    });
+    var scoreEl = document.getElementById('hs-quiz-score');
+    scoreEl.textContent = 'Score: ' + score + ' / ' + total;
+    scoreEl.classList.remove('hidden');
+  });
 })();
 </script>
 </body>

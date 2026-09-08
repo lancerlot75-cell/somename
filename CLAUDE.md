@@ -70,6 +70,15 @@ future tool = one new registry entry + one new view `<section>`
   Three.js scene: inputs for link lengths (or cam profile); animates
   the linkage motion in real time.
 
+### Added outside Phase 1 — Hydraulic Sequencing Circuits
+- **Done.** A third tool (not part of the original Phase 1 list): a 2D SVG
+  step-through simulator covering two sequencing circuits — a mechanical
+  (pilot-operated) sequence valve circuit (STAMP/CLAMP) and a pressure
+  sequencing valve circuit (A/B). Each circuit's content is followed by an
+  inline check-in question (shows right/wrong, then a Continue button reveals
+  the next part regardless of the answer), and the tool ends with a 3-question
+  quiz.
+
 ### Later phases (not yet planned in detail)
 - More tools/lessons: extend the registry + add a view section
   per tool.
