@@ -55,15 +55,17 @@ future tool = one new registry entry + one new view `<section>`
   some duplication between tools is expected and fine until more
   tools exist and real commonality is clear.
 
-### Phase 1 — Portal shell + 2 tools (shell done, tool logic not started)
+### Phase 1 — Portal shell + 2 tools (1 of 2 tools done)
 - **Shell — done.** `index.html` has the home/catalog view (card grid
   driven by the tool registry), hash-based routing between views, and
-  a theme toggle persisted to `localStorage`. Both tools below exist as
-  placeholder views that the nav opens/closes correctly, proving the
-  pattern end-to-end — no real tool logic yet.
-- **Reciprocating pump visualizer — not started.** Real Three.js scene:
-  sliders for RPM, stroke length (and similar params); animates the
-  piston/crank/connecting rod in real time via slider-crank kinematics.
+  a theme toggle persisted to `localStorage`.
+- **Reciprocating pump visualizer — done.** Real Three.js scene with
+  OrbitControls: sliders for crank speed (RPM), stroke length, and
+  connecting rod length drive slider-crank kinematics in real time,
+  animating the crank arm, connecting rod, and piston. Two valve
+  indicators at the cylinder head switch between intake/discharge based
+  on piston velocity direction; a readout panel shows live crank angle,
+  piston position/velocity, and stroke phase.
 - **Four-bar linkage / cam mechanism visualizer — not started.** Real
   Three.js scene: inputs for link lengths (or cam profile); animates
   the linkage motion in real time.

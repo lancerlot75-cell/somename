@@ -17,6 +17,8 @@
 <script>
   tailwind.config = { darkMode: 'class' };
 </script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100">
 
@@ -42,9 +44,54 @@
     <section id="view-pump-visualizer" class="hidden" data-tool-view>
       <a href="#" class="text-sm text-slate-500 dark:text-slate-400 hover:underline">&larr; Back to catalog</a>
       <h1 class="text-2xl font-bold mt-2 mb-1">Reciprocating Pump Visualizer</h1>
-      <p class="text-slate-600 dark:text-slate-400">
-        Placeholder view — tool logic not implemented yet. This proves the routing shell can open and close this view.
+      <p class="text-slate-600 dark:text-slate-400 mb-4">
+        A slider-crank mechanism drives the piston through its intake and discharge strokes.
+        Adjust the crank speed and geometry below.
       </p>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div id="pump-canvas-wrap"
+          class="lg:col-span-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 aspect-[4/3]">
+        </div>
+
+        <div class="space-y-5">
+          <div>
+            <label for="pump-rpm" class="flex justify-between text-sm font-medium mb-1">
+              <span>Crank speed</span><span id="pump-rpm-value">120 RPM</span>
+            </label>
+            <input id="pump-rpm" type="range" min="10" max="300" step="1" value="120" class="w-full">
+          </div>
+          <div>
+            <label for="pump-stroke" class="flex justify-between text-sm font-medium mb-1">
+              <span>Stroke length</span><span id="pump-stroke-value">80 mm</span>
+            </label>
+            <input id="pump-stroke" type="range" min="40" max="160" step="1" value="80" class="w-full">
+          </div>
+          <div>
+            <label for="pump-rod" class="flex justify-between text-sm font-medium mb-1">
+              <span>Connecting rod length</span><span id="pump-rod-value">200 mm</span>
+            </label>
+            <input id="pump-rod" type="range" min="120" max="320" step="1" value="200" class="w-full">
+          </div>
+
+          <div class="rounded-md border border-slate-200 dark:border-slate-700 p-3 text-sm space-y-1.5">
+            <div class="flex justify-between">
+              <span class="text-slate-500 dark:text-slate-400">Crank angle</span><span id="pump-readout-angle">0°</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-500 dark:text-slate-400">Piston position</span><span id="pump-readout-position">0 mm</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-500 dark:text-slate-400">Piston velocity</span><span id="pump-readout-velocity">0 mm/s</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-500 dark:text-slate-400">Stroke phase</span><span id="pump-readout-phase">Intake</span>
+            </div>
+          </div>
+
+          <p class="text-xs text-slate-500 dark:text-slate-400">Drag to rotate the view, scroll to zoom.</p>
+        </div>
+      </div>
     </section>
 
     <section id="view-four-bar-linkage" class="hidden" data-tool-view>
@@ -108,6 +155,213 @@
   renderHomeGrid();
   showView();
   updateThemeToggleLabel();
+</script>
+
+<script>
+(function () {
+  var section = document.getElementById('view-pump-visualizer');
+  var container = document.getElementById('pump-canvas-wrap');
+  var rpmInput = document.getElementById('pump-rpm');
+  var strokeInput = document.getElementById('pump-stroke');
+  var rodInput = document.getElementById('pump-rod');
+  var rpmValueEl = document.getElementById('pump-rpm-value');
+  var strokeValueEl = document.getElementById('pump-stroke-value');
+  var rodValueEl = document.getElementById('pump-rod-value');
+  var angleReadout = document.getElementById('pump-readout-angle');
+  var positionReadout = document.getElementById('pump-readout-position');
+  var velocityReadout = document.getElementById('pump-readout-velocity');
+  var phaseReadout = document.getElementById('pump-readout-phase');
+
+  var scene, camera, renderer, controls;
+  var crankArm, crankPin, rod, piston, cylinderHousing, intakeValve, dischargeValve;
+  var clock = new THREE.Clock();
+  var theta = 0;
+  var prevPistonX = null;
+  var initialized = false;
+
+  // Slider-crank kinematics: r = crank radius, L = connecting rod length.
+  function params() {
+    return {
+      rpm: parseFloat(rpmInput.value),
+      r: parseFloat(strokeInput.value) / 2,
+      L: parseFloat(rodInput.value)
+    };
+  }
+
+  // Piston distance from the crank axis, along the sliding (X) axis.
+  function pistonX(r, L, angle) {
+    var s = Math.sin(angle);
+    var c = Math.cos(angle);
+    return r * c + Math.sqrt(L * L - r * r * s * s);
+  }
+
+  // Stretches/rotates a unit-length (along local X) box mesh to span two
+  // points in the X-Y plane — used for both the crank arm and the rod, since
+  // both are just rigid links whose endpoints move every frame.
+  function alignBoxBetween(mesh, from, to) {
+    var dx = to.x - from.x, dy = to.y - from.y;
+    mesh.position.set((from.x + to.x) / 2, (from.y + to.y) / 2, 0);
+    mesh.rotation.z = Math.atan2(dy, dx);
+    mesh.scale.x = Math.sqrt(dx * dx + dy * dy);
+  }
+
+  // Cylinder housing + valves depend on r and L, but only change when a
+  // slider changes (not every frame), so they're rebuilt on 'input' instead
+  // of recomputed in the animation loop.
+  function rebuildHousing() {
+    var p = params();
+    var margin = p.r * 0.4 + 5;
+    var sMin = p.L - p.r;
+    var sMax = p.L + p.r;
+    var length = (sMax - sMin) + margin * 2;
+    var centerX = (sMin + sMax) / 2;
+
+    if (cylinderHousing) {
+      scene.remove(cylinderHousing);
+      cylinderHousing.geometry.dispose();
+    }
+    var geo = new THREE.CylinderGeometry(28, 28, length, 32, 1, true);
+    cylinderHousing = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
+      color: 0x64748b, transparent: true, opacity: 0.35, side: THREE.DoubleSide
+    }));
+    cylinderHousing.rotation.z = Math.PI / 2;
+    cylinderHousing.position.set(centerX, 0, 0);
+    scene.add(cylinderHousing);
+
+    intakeValve.position.set(sMax + margin * 0.6, 0, 12);
+    dischargeValve.position.set(sMax + margin * 0.6, 0, -12);
+
+    controls.target.set(centerX, 0, 0);
+  }
+
+  function initScene() {
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xe2e8f0);
+
+    camera = new THREE.PerspectiveCamera(45, 1, 1, 5000);
+    camera.position.set(280, 200, 420);
+
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    container.innerHTML = '';
+    container.appendChild(renderer.domElement);
+
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+    var dirLight = new THREE.DirectionalLight(0xffffff, 0.7);
+    dirLight.position.set(250, 350, 250);
+    scene.add(dirLight);
+
+    var ground = new THREE.Mesh(
+      new THREE.PlaneGeometry(1200, 1200),
+      new THREE.MeshStandardMaterial({ color: 0xcbd5e1, side: THREE.DoubleSide })
+    );
+    ground.rotation.x = Math.PI / 2;
+    ground.position.y = -70;
+    scene.add(ground);
+
+    crankArm = new THREE.Mesh(
+      new THREE.BoxGeometry(1, 12, 12),
+      new THREE.MeshStandardMaterial({ color: 0x475569 })
+    );
+    scene.add(crankArm);
+
+    crankPin = new THREE.Mesh(
+      new THREE.SphereGeometry(9, 20, 20),
+      new THREE.MeshStandardMaterial({ color: 0x1e293b })
+    );
+    scene.add(crankPin);
+
+    rod = new THREE.Mesh(
+      new THREE.BoxGeometry(1, 9, 9),
+      new THREE.MeshStandardMaterial({ color: 0x94a3b8 })
+    );
+    scene.add(rod);
+
+    piston = new THREE.Mesh(
+      new THREE.CylinderGeometry(24, 24, 34, 32),
+      new THREE.MeshStandardMaterial({ color: 0x2563eb })
+    );
+    piston.rotation.z = Math.PI / 2;
+    scene.add(piston);
+
+    var valveGeo = new THREE.CylinderGeometry(6, 6, 6, 20);
+    intakeValve = new THREE.Mesh(valveGeo, new THREE.MeshStandardMaterial({ color: 0x334155 }));
+    dischargeValve = new THREE.Mesh(valveGeo, new THREE.MeshStandardMaterial({ color: 0x334155 }));
+    intakeValve.rotation.x = Math.PI / 2;
+    dischargeValve.rotation.x = Math.PI / 2;
+    scene.add(intakeValve);
+    scene.add(dischargeValve);
+
+    rebuildHousing();
+    initialized = true;
+  }
+
+  function resize() {
+    if (!renderer) return;
+    var w = container.clientWidth, h = container.clientHeight;
+    if (!w || !h) return;
+    renderer.setSize(w, h);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+
+  function tick() {
+    requestAnimationFrame(tick);
+    if (!initialized || section.classList.contains('hidden')) return;
+
+    var dt = clock.getDelta();
+    var p = params();
+    var omega = (p.rpm * 2 * Math.PI) / 60;
+    theta += omega * dt;
+
+    var crankPinPos = { x: p.r * Math.cos(theta), y: p.r * Math.sin(theta) };
+    var pX = pistonX(p.r, p.L, theta);
+
+    alignBoxBetween(crankArm, { x: 0, y: 0 }, crankPinPos);
+    crankPin.position.set(crankPinPos.x, crankPinPos.y, 0);
+    alignBoxBetween(rod, crankPinPos, { x: pX, y: 0 });
+    piston.position.set(pX, 0, 0);
+
+    var velocity = prevPistonX === null ? 0 : (pX - prevPistonX) / dt;
+    prevPistonX = pX;
+
+    var intakeOpen = velocity > 0;
+    intakeValve.material.color.set(intakeOpen ? 0x22c55e : 0x334155);
+    dischargeValve.material.color.set(!intakeOpen ? 0xf97316 : 0x334155);
+
+    var normalizedAngle = ((theta % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+    angleReadout.textContent = Math.round(normalizedAngle * 180 / Math.PI) + '°';
+    positionReadout.textContent = Math.round(pX) + ' mm';
+    velocityReadout.textContent = Math.round(velocity) + ' mm/s';
+    phaseReadout.textContent = intakeOpen ? 'Intake' : 'Discharge';
+
+    controls.update();
+    renderer.render(scene, camera);
+  }
+
+  function onParamsChanged() {
+    rpmValueEl.textContent = rpmInput.value + ' RPM';
+    strokeValueEl.textContent = strokeInput.value + ' mm';
+    rodValueEl.textContent = rodInput.value + ' mm';
+    if (initialized) rebuildHousing();
+  }
+
+  [rpmInput, strokeInput, rodInput].forEach(function (input) {
+    input.addEventListener('input', onParamsChanged);
+  });
+
+  window.addEventListener('resize', resize);
+  window.addEventListener('hashchange', function () {
+    if (location.hash === '#pump-visualizer') resize();
+  });
+
+  onParamsChanged();
+  initScene();
+  if (location.hash === '#pump-visualizer') resize();
+  tick();
+})();
 </script>
 </body>
 </html>
