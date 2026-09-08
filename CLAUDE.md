@@ -25,3 +25,47 @@
 - Before implementing any non-trivial feature, ask clarifying
   questions about scope, edge cases, and constraints first —
   don't propose a plan until you've asked.
+
+## Feature Plan
+
+Portal for browsing/trying a growing collection of small web
+tools and learning artifacts. Everything lives in `index.html`;
+tools are views within it, not separate pages.
+
+**Data model — tool registry:** a JS array of
+`{ id, title, description }` objects, one entry per tool. The
+home grid and the router both read from this array. Adding a
+future tool = one new registry entry + one new view `<section>`
+— no shell rewrite.
+
+**Key flows:**
+- *Routing:* read `location.hash` on load and on `hashchange`.
+  A hash matching a registry `id` shows that tool's `<section>`
+  and hides the rest; no match (or empty hash) shows the home/
+  catalog view. Each tool view has a "back to catalog" link.
+- *Home view:* renders one card per registry entry (title +
+  one-line description), linking to `#<id>`.
+- *Theme toggle:* a toggle button flips a `dark` class on
+  `<html>` (Tailwind's `dark:` strategy) and persists the choice
+  to `localStorage`; the stored (or system) preference is
+  applied before first paint to avoid a flash of the wrong theme.
+- *Per-tool rendering:* each tool's Three.js scene/camera/
+  renderer/animation loop is self-contained in its own `<script>`
+  block. No shared rendering/control-panel abstraction yet —
+  some duplication between tools is expected and fine until more
+  tools exist and real commonality is clear.
+
+### Phase 1 — Portal shell + 2 tools (not started)
+Prove the pattern with exactly two tools:
+- **Reciprocating pump visualizer** — sliders for RPM, stroke
+  length (and similar params); Three.js animates the piston/
+  crank/connecting rod in real time via slider-crank kinematics.
+- **Four-bar linkage / cam mechanism visualizer** — inputs for
+  link lengths (or cam profile); Three.js animates the linkage
+  motion in real time.
+
+### Later phases (not yet planned in detail)
+- More tools/lessons: extend the registry + add a view section
+  per tool.
+- Revisit whether shared rendering/control-panel helpers are
+  worth extracting once several tools exist.
